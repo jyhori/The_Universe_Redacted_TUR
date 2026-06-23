@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Universe Redacted (TUR)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #0a0a0a;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #app {
+      width: 900px;
+      max-width: 95%;
+      background: #111;
+      border: 2px solid #00ff00;
+      padding: 20px;
+      box-shadow: 0 0 30px #00ff0044;
+      border-radius: 8px;
+      position: relative;
+    }
+    button {
+      background: #222;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      padding: 5px 12px;
+      margin: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+    button:hover {
+      background: #00ff00;
+      color: #000;
+    }
+    input, select, textarea {
+      background: #000;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      padding: 6px;
+      font-family: inherit;
+      margin: 3px;
+      border-radius: 4px;
+      width: 200px;
+    }
+    textarea {
+      width: 100%;
+      height: 60px;
+      resize: vertical;
+    }
+    .section {
+      margin: 15px 0;
+      padding: 10px;
+      border: 1px dashed #00ff0055;
+    }
+    .terminal-window {
+      background: #000;
+      border: 2px solid #00ff00;
+      padding: 15px;
+      height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      margin: 10px 0;
+    }
+    .progress-bar {
+      display: inline-block;
+      background: #111;
+      padding: 2px;
+    }
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal {
+      background: #111;
+      border: 2px solid #00ff00;
+      padding: 25px;
+      max-width: 600px;
+      width: 90%;
+      color: #00ff00;
+      box-shadow: 0 0 50px #00ff00;
+    }
+    .close-btn {
+      float: right;
+      background: transparent;
+      border: none;
+      color: #ff0000;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .avatar-small {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #333;
+      border: 1px solid #00ff00;
+      display: inline-block;
+      vertical-align: middle;
+      object-fit: cover;
+    }
+    .flex-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    hr {
+      border-color: #00ff0044;
+      margin: 10px 0;
+    }
+    .red {
+      color: #ff5555;
+    }
+    .blink {
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    // ==================== ЛОКАЛИЗАЦИЯ ====================
+    const LANG = {
+      ru: {
+        title: "The Universe Redacted (TUR)",
+        setLang: "Выбрать язык",
+        setAvatar: "Аватар",
+        visibility: "Видимость",
+        public: "Публичный",
+        private: "Приватный",
+        nickname: "Никнейм",
+        description: "Описание",
+        note: "Заметка",
+        save: "Сохранить",
+        cancel: "Отмена",
+        userSearch: "Поиск пользователя",
+        redactor: "Редактор",
+        createUniverse: "Создать вселенную",
+        universeList: "Список вселенных",
+        noUniverses: "0 вселенных",
+        terminal: "Терминал",
+        login: "Войти",
+        explode: "Взорвать",
+        remove: "Удалить",
+        comeIn: "Войти!",
+        name: "Имя",
+        size: "Размер",
+        power: "Мощность",
+        state: "Состояние",
+        default: "По умолчанию",
+        powerful: "Мощная",
+        normal: "Нормально",
+        fast: "Быстро",
+        force: "Форсаж",
+        updateUpgrade: "Действие при росте/падении",
+        action: "Действие",
+        biological: "Биологическое поведение",
+        connect: "Соединение",
+        create: "Создать",
+        removeUniverse: "Удалить вселенную",
+        explodeUniverse: "Взорвать вселенную",
+        logInUniverse: "Войти во вселенную",
+        uoew: "Окно вывода вселенной",
+        cdoe: "Отладка (CDOE)",
+        age: "Возраст",
+        destroyed: "уничтожена",
+        permissionDenied: "Доступ запрещён",
+        sure: "Вы уверены? Y/N",
+        removing: "Удаление",
+        exploding: "Взрыв",
+        approxTime: "Примерное время",
+        timeLeft: "Осталось",
+        seconds: "сек",
+        userDoesNotExist: "Пользователь не существует",
+        viewProfile: "Просмотр профиля",
+        online: "Онлайн",
+        offline: "Офлайн",
+        timeSpent: "Время на сайте",
+        achievements: "Достижения",
+        followers: "Подписчики",
+        following: "Подписки",
+        follow: "Подписаться",
+        chat: "Чат",
+        send: "Отправить",
+        recordVoice: "Записать голосовое",
+        listen: "Слушать",
+        loop: "Повтор",
+        more: "Ещё",
+        other: "Другое",
+        passwordDev: "Пароль разработчика",
+        invalidPass: "Неверный пароль",
+        ban: "Бан",
+        displayText: "Вывести текст на экран",
+        viewCdoe: "Просмотр CDOE",
+        color: "Цвет",
+        text: "Текст",
+        display: "Показать",
+        banReason: "Причина",
+        banComment: "Комментарий",
+        banTime: "Время бана",
+        bannedMessage: "Вы забанены",
+        viewLog: "Просмотр логов",
+        addLog: "Добавить лог",
+        clearVlc: "Очистить логи",
+        removeUser: "Удалить пользователя",
+        reboot: "Перезагрузка",
+        aloneHelp: "Введите 'help' для справки",
+        aloneCommand: "alone]",
+        abyssHint: "для восстановления введите 'unremove current user true'",
+        help: "помощь"
+      },
+      en: {
+        title: "The Universe Redacted (TUR)",
+        setLang: "Set language",
+        setAvatar: "Avatar",
+        visibility: "Visibility",
+        public: "Public",
+        private: "Private",
+        nickname: "Nickname",
+        description: "Description",
+        note: "Note",
+        save: "Save",
+        cancel: "Cancel",
+        userSearch: "User search",
+        redactor: "Redactor",
+        createUniverse: "Create universe",
+        universeList: "Universe list",
+        noUniverses: "0 universes",
+        terminal: "Terminal",
+        login: "Log in",
+        explode: "Explode",
+        remove: "Remove",
+        comeIn: "Come in!",
+        name: "Name",
+        size: "Size",
+        power: "Power",
+        state: "State",
+        default: "Default",
+        powerful: "Powerful",
+        normal: "Normal",
+        fast: "Fast",
+        force: "Force",
+        updateUpgrade: "Do if grew/down",
+        action: "Action",
+        biological: "Biological behavior",
+        connect: "Connect",
+        create: "Create",
+        removeUniverse: "Remove universe",
+        explodeUniverse: "Explode universe",
+        logInUniverse: "Log in universe",
+        uoew: "Universe Output Environment Window",
+        cdoe: "Console Debugging Output",
+        age: "Age",
+        destroyed: "destroyed",
+        permissionDenied: "Permission denied",
+        sure: "Are you sure? Y/N",
+        removing: "Removing",
+        exploding: "Exploding",
+        approxTime: "Approximate time",
+        timeLeft: "Time left",
+        seconds: "sec",
+        userDoesNotExist: "User does not exist",
+        viewProfile: "View profile",
+        online: "Online",
+        offline: "Offline",
+        timeSpent: "Time spent on site",
+        achievements: "Achievements",
+        followers: "Followers",
+        following: "Following",
+        follow: "Follow",
+        chat: "Chat",
+        send: "Send",
+        recordVoice: "Record a voice message",
+        listen: "Listen",
+        loop: "Loop",
+        more: "More",
+        other: "Other",
+        passwordDev: "Developer password",
+        invalidPass: "Invalid password",
+        ban: "Ban",
+        displayText: "Display text on screen",
+        viewCdoe: "View CDOE",
+        color: "Color",
+        text: "Text",
+        display: "Display",
+        banReason: "Reason",
+        banComment: "Comment",
+        banTime: "Ban time",
+        bannedMessage: "You have been banned",
+        viewLog: "View log",
+        addLog: "Add log",
+        clearVlc: "Clear logs",
+        removeUser: "Remove user",
+        reboot: "Reboot",
+        aloneHelp: "type 'help' for reference",
+        aloneCommand: "alone]",
+        abyssHint: "for unremove user and recover it, enter command 'unremove current user true'",
+        help: "help"
+      },
+      it: {
+        title: "The Universe Redacted (TUR)",
+        setLang: "Imposta lingua",
+        setAvatar: "Avatar",
+        visibility: "Visibilità",
+        public: "Pubblico",
+        private: "Privato",
+        nickname: "Nickname",
+        description: "Descrizione",
+        note: "Nota",
+        save: "Salva",
+        cancel: "Annulla",
+        userSearch: "Cerca utente",
+        redactor: "Redattore",
+        createUniverse: "Crea universo",
+        universeList: "Elenco universi",
+        noUniverses: "0 universi",
+        terminal: "Terminale",
+        login: "Accedi",
+        explode: "Esplodi",
+        remove: "Rimuovi",
+        comeIn: "Entra!",
+        name: "Nome",
+        size: "Dimensione",
+        power: "Potenza",
+        state: "Stato",
+        default: "Predefinito",
+        powerful: "Potente",
+        normal: "Normale",
+        fast: "Veloce",
+        force: "Forza",
+        updateUpgrade: "Se cresce/cala",
+        action: "Azione",
+        biological: "Comportamento biologico",
+        connect: "Connetti",
+        create: "Crea",
+        removeUniverse: "Rimuovi universo",
+        explodeUniverse: "Esplodi universo",
+        logInUniverse: "Accedi all'universo",
+        uoew: "Finestra di output universo",
+        cdoe: "Console di debug",
+        age: "Età",
+        destroyed: "distrutto",
+        permissionDenied: "Permesso negato",
+        sure: "Sei sicuro? Y/N",
+        removing: "Rimozione",
+        exploding: "Esplosione",
+        approxTime: "Tempo approssimativo",
+        timeLeft: "Tempo rimanente",
+        seconds: "sec",
+        userDoesNotExist: "Utente inesistente",
+        viewProfile: "Vedi profilo",
+        online: "Online",
+        offline: "Offline",
+        timeSpent: "Tempo sul sito",
+        achievements: "Obiettivi",
+        followers: "Follower",
+        following: "Seguiti",
+        follow: "Segui",
+        chat: "Chat",
+        send: "Invia",
+        recordVoice: "Registra messaggio vocale",
+        listen: "Ascolta",
+        loop: "Ripeti",
+        more: "Altro",
+        other: "Altro",
+        passwordDev: "Password sviluppatore",
+        invalidPass: "Password errata",
+        ban: "Ban",
+        displayText: "Mostra testo sullo schermo",
+        viewCdoe: "Visualizza CDOE",
+        color: "Colore",
+        text: "Testo",
+        display: "Mostra",
+        banReason: "Motivo",
+        banComment: "Commento",
+        banTime: "Durata ban",
+        bannedMessage: "Sei stato bannato",
+        viewLog: "Visualizza log",
+        addLog: "Aggiungi log",
+        clearVlc: "Pulisci log",
+        removeUser: "Rimuovi utente",
+        reboot: "Riavvia",
+        aloneHelp: "digita 'help' per aiuto",
+        aloneCommand: "alone]",
+        abyssHint: "per recuperare l'utente inserisci 'unremove current user true'",
+        help: "aiuto"
+      }
+    };
+
+    let currentLang = localStorage.getItem('tur_lang') || 'ru';
+    function t(key) {
+      return LANG[currentLang]?.[key] || key;
+    }
+
+    // ==================== ДАННЫЕ ====================
+    const STORAGE_KEYS = {
+      users: 'tur_users',
+      currentUserId: 'tur_currentUserId',
+      nextUserId: 'tur_nextUserId',
+      universes: 'tur_universes',
+      cdoe: 'tur_cdoe',
+      terminalFS: 'tur_terminalFS',
+      chats: 'tur_chats',
+      typing: 'tur_typing',
+      screenText: 'tur_screenText',
+      lastActive: 'tur_lastActive'
+    };
+    
+    const PRIVATE_AVATAR_PLACEHOLDER = 'gallery/private_avatar.png';
+    
+    const SITE_CREATION_TIME_KEY = 'tur_siteCreationTime';
+function getSiteCreationTime() {
+    let time = localStorage.getItem(SITE_CREATION_TIME_KEY);
+    if (!time) {
+        time = Date.now().toString();
+        localStorage.setItem(SITE_CREATION_TIME_KEY, time);
+    }
+    return parseInt(time);
+}
+    
+    let nanosecondCounter = 0;
+let lastNanosecondLog = Date.now();
+
+function startNanosecondTimer() {
+    setInterval(() => {
+        const now = Date.now();
+        const elapsedMs = now - lastNanosecondLog;
+        // 1 миллисекунда = 1 000 000 наносекунд
+        const nanosecondsPassed = Math.floor(elapsedMs * 1000000);
+        if (nanosecondsPassed >= 1) {
+            nanosecondCounter += nanosecondsPassed;
+            lastNanosecondLog = now;
+            addCDOE({ userId: 'System', action: `CDOE: ${nanosecondCounter} nanosecond is successfully passed, abort..` });
+        }
+    }, 3600000); // проверка каждую миллисекунду
+}
+    
+    function getUsers() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.users) || '[]');
+    }
+    function saveUsers(users) {
+      localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(users));
+    }
+    function getCurrentUserId() {
+      return localStorage.getItem(STORAGE_KEYS.currentUserId);
+    }
+    function setCurrentUserId(id) {
+      localStorage.setItem(STORAGE_KEYS.currentUserId, id);
+    }
+    function getNextUserId() {
+      let n = parseInt(localStorage.getItem(STORAGE_KEYS.nextUserId) || '128');
+      if (n < 128) n = 128;
+      return n;
+    }
+    function incNextUserId() {
+      let n = getNextUserId() + 1;
+      if (n > 9223372036854775807) n = 9223372036854775807;
+      localStorage.setItem(STORAGE_KEYS.nextUserId, n.toString());
+      return n - 1;
+    }
+    function getUniverses() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.universes) || '[]');
+    }
+    function saveUniverses(arr) {
+      localStorage.setItem(STORAGE_KEYS.universes, JSON.stringify(arr));
+    }
+    function getCDOE() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.cdoe) || '[]');
+    }
+    function addCDOE(entry) {
+      const arr = getCDOE();
+      arr.push({ ...entry, num: arr.length + 1, date: new Date().toISOString() });
+      localStorage.setItem(STORAGE_KEYS.cdoe, JSON.stringify(arr));
+    }
+    function getTerminalFS() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.terminalFS) || '{"home":{"user":{}}}');
+    }
+    function saveTerminalFS(fs) {
+      localStorage.setItem(STORAGE_KEYS.terminalFS, JSON.stringify(fs));
+    }
+    function getChats() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.chats) || '{}');
+    }
+    function saveChats(obj) {
+      localStorage.setItem(STORAGE_KEYS.chats, JSON.stringify(obj));
+    }
+
+    // ==================== ИНИЦИАЛИЗАЦИЯ ПОЛЬЗОВАТЕЛЯ ====================
+    function initUser() {
+      let users = getUsers();
+      let currentId = getCurrentUserId();
+      if (!currentId || !users.find(u => u.id === currentId)) {
+        // создаём нового
+        const newId = incNextUserId().toString();
+        const newUser = {
+          id: newId,
+          nickname: 'user_' + newId,
+          description: '',
+          note: '',
+          avatar: '',
+          visibility: 'public',
+          followers: [],
+          following: [],
+          achievements: [],
+          ban: null,
+          logs: [],
+          lastActive: Date.now(),
+          timeSpent: 0
+        };
+        users.push(newUser);
+        saveUsers(users);
+        setCurrentUserId(newId);
+        return newUser;
+      } else {
+        let user = users.find(u => u.id === currentId);
+        if (user) {
+          user.lastActive = Date.now();
+          saveUsers(users);
+        }
+        return user;
+      }
+    }
+
+    let currentUser = initUser();
+    window.addEventListener('beforeunload', () => {
+      let users = getUsers();
+      let u = users.find(x => x.id === currentUser.id);
+      if (u) {
+        u.timeSpent = (u.timeSpent || 0) + Math.floor((Date.now() - (u.lastActive || Date.now())) / 1000);
+        u.lastActive = Date.now();
+        saveUsers(users);
+      }
+    });
+
+    // ==================== РЕНДЕРИНГ ====================
+    const app = document.getElementById('app');
+
+    function renderMain() {
+      currentUser = getUsers().find(u => u.id === getCurrentUserId()) || initUser();
+      if (currentUser.ban && currentUser.ban.until > Date.now()) {
+        renderBanScreen(currentUser);
+        return;
+      }
+      app.innerHTML = '';
+      const html = `
+        <div class="section">
+          <h2>${t('title')}</h2>
+          <div class="flex-row">
+            <span>${t('setLang')}:</span>
+            <select id="langSelect">
+              <option value="ru" ${currentLang==='ru'?'selected':''}>RU 🇷🇺</option>
+              <option value="en" ${currentLang==='en'?'selected':''}>EN 🇺🇸</option>
+              <option value="it" ${currentLang==='it'?'selected':''}>IT 🇮🇹</option>
+            </select>
+          </div>
+          <hr>
+          <div><strong>${t('setAvatar')}:</strong> 
+            <input type="file" id="avatarInput" accept="image/*"> 
+            <img id="avatarPreview" class="avatar-small" src="${currentUser.avatar || ''}" style="${currentUser.avatar?'':'display:none'}">
+            <span>${t('visibility')}: <select id="avatarVis">${['public','private'].map(v=>`<option value="${v}" ${currentUser.visibility===v?'selected':''}>${t(v)}</option>`).join('')}</select></span>
+          </div>
+          <div>${t('nickname')}: <input id="nicknameInput" value="${escapeHtml(currentUser.nickname)}"> <button id="saveProfile">${t('save')}</button></div>
+          <div>${t('description')}: <textarea id="descInput">${escapeHtml(currentUser.description)}</textarea></div>
+          <div>${t('note')}: <textarea id="noteInput">${escapeHtml(currentUser.note)}</textarea></div>
+          <div>User id: ${currentUser.id}</div>
+          <hr>
+          <button id="redactorBtn">${t('redactor')}</button>
+          <button id="userSearchBtn">${t('userSearch')}</button>
+          <button id="terminalBtn">${t('terminal')} [>_]</button>
+          <div id="redactorArea" hidden></div>
+          <div id="searchArea" hidden></div>
+        </div>
+        <div id="modalContainer"></div>
+      `;
+      app.innerHTML = html;
+      document.getElementById('langSelect').onchange = (e) => {
+        currentLang = e.target.value;
+        localStorage.setItem('tur_lang', currentLang);
+        renderMain();
+      };
+      document.getElementById('saveProfile').onclick = () => {
+        let users = getUsers();
+        let u = users.find(x => x.id === currentUser.id);
+        if (u) {
+          u.nickname = document.getElementById('nicknameInput').value || u.nickname;
+          u.description = document.getElementById('descInput').value;
+          u.note = document.getElementById('noteInput').value;
+          u.visibility = document.getElementById('avatarVis').value;
+          saveUsers(users);
+          currentUser = u;
+          addCDOE({ userId: currentUser.id, action: 'updated profile' });
+        }
+        renderMain();
+      };
+      document.getElementById('avatarInput').onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            let users = getUsers();
+            let u = users.find(x => x.id === currentUser.id);
+            if (u) {
+              u.avatar = reader.result;
+              saveUsers(users);
+              currentUser = u;
+              renderMain();
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      document.getElementById('redactorBtn').onclick = showRedactor;
+      document.getElementById('userSearchBtn').onclick = showUserSearch;
+      document.getElementById('terminalBtn').onclick = () => openTerminal();
+    }
+
+    function showRedactor() {
+      const area = document.getElementById('redactorArea');
+      area.hidden = !area.hidden;
+      if (!area.hidden) {
+        area.innerHTML = '';
+        const universes = getUniverses().filter(u => u.ownerId === currentUser.id);
+        area.innerHTML = `
+          <div class="section">
+            <button id="createUniverseBtn">${t('createUniverse')}</button>
+            <h3>${t('universeList')} (${universes.length})</h3>
+            <div id="universeListContainer"></div>
+          </div>
+        `;
+        document.getElementById('createUniverseBtn').onclick = renderCreateUniverse;
+        renderUniverseList(universes);
+      }
+    }
+
+    function renderUniverseList(universes) {
+      const container = document.getElementById('universeListContainer');
+      if (!container) return;
+      container.innerHTML = universes.length ? universes.map(u => {
+        const destroyed = u.destroyed || u.size >= 1;
+        return `
+          <div class="section">
+            <strong>${t('name')}:</strong> ${escapeHtml(u.name)}<br>
+            ${t('created')}: ${u.createdDate} ${u.createdTime}<br>
+            ${t('size')}: ${u.size.toFixed(8)} ${destroyed ? `<span class="red">(${t('destroyed')})</span>` : ''}<br>
+            <button onclick="loginUniverse('${u.id}')" ${destroyed?'disabled':''}>${t('login')}</button>
+            <button onclick="explodeUniverse('${u.id}')">${t('explode')}</button>
+            <button onclick="removeUniverse('${u.id}')">${t('remove')}</button>
+          </div>
+        `;
+      }).join('') : `<p>${t('noUniverses')}</p>`;
+    }
+
+    function renderCreateUniverse() {
+      const modal = document.createElement('div');
+      modal.className = 'overlay';
+      modal.innerHTML = `
+        <div class="modal">
+          <span class="close-btn" id="closeCreate">[X]</span>
+          <h3>${t('createUniverse')}</h3>
+          <div>${t('name')}: <input id="uname" placeholder="Universe"></div>
+          <div>${t('size')}: <input id="usize" type="number" step="any" placeholder="0.00000005"> (0-1)</div>
+          <div>${t('power')}: <select id="upower"><option>Default</option><option>Powerful</option></select></div>
+          <div>${t('state')}: <select id="ustate"><option>Normal</option><option>Fast</option><option>Force</option></select></div>
+          <div>${t('updateUpgrade')}: <select id="udo"><option>Default</option><option>Force</option><option>Max</option><option>Ultra</option></select></div>
+          <div>${t('action')}: <select id="uaction"><option>Default</option><option>Force</option><option>Max</option><option>Ultra</option></select></div>
+          <div>${t('connect')}: <select id="uconnect"><option>Default</option><option>Force</option><option>Max</option><option>Ultra</option></select></div>
+          <button id="createUniverseConfirm">${t('create')}</button>
+          <button id="cancelCreate">${t('cancel')}</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.getElementById('closeCreate').onclick = () => modal.remove();
+      document.getElementById('cancelCreate').onclick = () => modal.remove();
+      document.getElementById('createUniverseConfirm').onclick = () => {
+        const name = document.getElementById('uname').value || 'Universe';
+        const size = parseFloat(document.getElementById('usize').value) || 0;
+        const power = document.getElementById('upower').value;
+        const state = document.getElementById('ustate').value;
+        const now = new Date();
+        const uni = {
+          id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+          name,
+          ownerId: currentUser.id,
+          createdDate: now.toLocaleDateString(),
+          createdTime: now.toLocaleTimeString(),
+          size: Math.min(1, Math.max(0, size)),
+          power,
+          state,
+          destroyed: false,
+          lastUpdate: Date.now()
+        };
+        const universes = getUniverses();
+        universes.push(uni);
+        saveUniverses(universes);
+        addCDOE({ userId: currentUser.id, action: `created universe ${name}` });
+        modal.remove();
+        showRedactor();
+      };
+    }
+
+    window.loginUniverse = function(id) {
+      const universes = getUniverses();
+      const uni = universes.find(u => u.id === id);
+      if (!uni || uni.destroyed) return;
+      updateUniverseSize(uni);
+      const modal = document.createElement('div');
+      modal.className = 'overlay';
+      modal.innerHTML = `
+        <div class="modal" style="max-width:800px">
+          <span class="close-btn" id="closeUniView">[X]</span>
+          <h3>${t('uoew')}: ${escapeHtml(uni.name)}</h3>
+          <div class="terminal-window" id="uoewDisplay" style="height:200px">↑ Universe<br>${'·'.repeat(50)}</div>
+          <div>${t('age')}: <span id="uniAge"></span> | ${t('size')}: <span id="uniSize"></span></div>
+          <h4>${t('cdoe')}</h4>
+          <div class="terminal-window" id="cdoeDisplay" style="height:200px"></div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      const closeBtn = document.getElementById('closeUniView');
+      closeBtn.onclick = () => modal.remove();
+      const updateDisplay = () => {
+        const u = getUniverses().find(x => x.id === id);
+        if (!u) { modal.remove(); return; }
+        updateUniverseSize(u);
+        document.getElementById('uniAge').textContent = (u.size * 1e8).toFixed(2) + ' units';
+        document.getElementById('uniSize').textContent = u.size.toFixed(8);
+        const cdoe = getCDOE().slice(-20).map(e => `[${e.num}] ${new Date(e.date).toLocaleString()} user "${e.userId}" ${e.action}`).join('\n');
+        document.getElementById('cdoeDisplay').textContent = cdoe || '--';
+        document.getElementById('uoewDisplay').innerHTML = `↑ Universe<br>${'·'.repeat(Math.floor(u.size * 50))}`;
+      };
+      updateDisplay();
+      const interval = setInterval(updateDisplay, 1000);
+      modal.addEventListener('close', () => clearInterval(interval));
+      closeBtn.addEventListener('click', () => clearInterval(interval));
+      addCDOE({ userId: currentUser.id, action: `logged in universe ${uni.name}` });
+    };
+
+    function updateUniverseSize(uni) {
+      if (uni.destroyed || uni.size >= 1) {
+        uni.destroyed = true;
+        uni.size = 1;
+        return;
+      }
+      const now = Date.now();
+      const elapsed = (now - uni.lastUpdate) / 1000;
+      let rate = 0.00000005;
+      if (uni.state === 'Fast') rate = 0.000005;
+      else if (uni.state === 'Force') rate = 0.0005;
+      if (uni.power === 'Powerful') rate *= 100;
+      uni.size = Math.min(1, uni.size + rate * elapsed);
+      uni.lastUpdate = now;
+      if (uni.size >= 1) uni.destroyed = true;
+      const universes = getUniverses();
+      const idx = universes.findIndex(u => u.id === uni.id);
+      if (idx !== -1) universes[idx] = uni;
+      saveUniverses(universes);
+    }
+
+    window.explodeUniverse = function(id) {
+      const universes = getUniverses();
+      const uni = universes.find(u => u.id === id);
+      if (!uni) return;
+      if (uni.destroyed) {
+        alert(`rm: cannot remove '~/${uni.name}/root/': ${t('permissionDenied')}. ${t('destroyed')}.`);
+        return;
+      }
+      simulateTerminalAction(`sudo rm -rf ~/${uni.name}/root/`, 1.5, () => {
+        uni.destroyed = true;
+        uni.size = 1;
+        saveUniverses(universes);
+        addCDOE({ userId: currentUser.id, action: `exploded universe ${uni.name}` });
+        showRedactor();
+      });
+    };
+
+    window.removeUniverse = function(id) {
+      const universes = getUniverses();
+      const uni = universes.find(u => u.id === id);
+      if (!uni) return;
+      if (uni.destroyed) {
+        alert(`rm: cannot remove '~/${uni.name}/': ${t('permissionDenied')}. Universe already exploded.`);
+        return;
+      }
+      simulateTerminalAction(`sudo rm -rf ~/${uni.name}/`, 2.5, () => {
+        const idx = universes.findIndex(u => u.id === id);
+        if (idx !== -1) universes.splice(idx, 1);
+        saveUniverses(universes);
+        addCDOE({ userId: currentUser.id, action: `removed universe ${uni.name}` });
+        showRedactor();
+      });
+    };
+
+    function simulateTerminalAction(command, durationSec, callback) {
+      const modal = document.createElement('div');
+      modal.className = 'overlay';
+      modal.innerHTML = `
+        <div class="modal">
+          <span class="close-btn" id="closeTermAction">[X]</span>
+          <div class="terminal-window" id="termActionOutput">tur@:~/#>${command}<br>Finding...<br></div>
+          <div id="progressContainer"></div>
+          <div><span id="approxTime"></span> | <span id="timeLeft"></span></div>
+          <button id="cancelAction">${t('cancel')}</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      const outputDiv = document.getElementById('termActionOutput');
+      const progressDiv = document.getElementById('progressContainer');
+      const approxSpan = document.getElementById('approxTime');
+      const leftSpan = document.getElementById('timeLeft');
+      let seconds = 0;
+      const totalTicks = Math.ceil(durationSec * 10);
+      let tick = 0;
+      const interval = setInterval(() => {
+        tick++;
+        const percent = Math.min(100, Math.floor((tick / totalTicks) * 100));
+        const hashes = '#'.repeat(percent);
+        progressDiv.innerHTML = `[${hashes}${'·'.repeat(100-percent)}] ${percent}%`;
+        approxSpan.textContent = `${t('approxTime')}: ${durationSec} ${t('seconds')}`;
+        leftSpan.textContent = `${t('timeLeft')}: ${Math.max(0, (durationSec - seconds)).toFixed(1)} ${t('seconds')}`;
+        seconds += 0.1;
+        if (tick >= totalTicks) {
+          clearInterval(interval);
+          outputDiv.innerHTML += `\nOperation completed.`;
+          setTimeout(() => {
+            modal.remove();
+            if (callback) callback();
+          }, 500);
+        }
+      }, 100);
+      document.getElementById('cancelAction').onclick = () => { clearInterval(interval); modal.remove(); };
+      document.getElementById('closeTermAction').onclick = () => { clearInterval(interval); modal.remove(); };
+    }
+
+    function showUserSearch() {
+      const area = document.getElementById('searchArea');
+      area.hidden = !area.hidden;
+      if (!area.hidden) {
+        area.innerHTML = `
+          <div class="section">
+            <input id="searchQuery" placeholder="${t('userSearch')}...">
+            <div id="searchResults"></div>
+          </div>
+        `;
+        document.getElementById('searchQuery').oninput = (e) => {
+          const q = e.target.value.trim().toLowerCase();
+          const users = getUsers();
+          const results = users.filter(u => u.id.includes(q) || u.nickname.toLowerCase().includes(q));
+          const container = document.getElementById('searchResults');
+          container.innerHTML = results.map(u => `
+            <div class="flex-row">
+              <img class="avatar-small" src="${getProfileAvatarUrl(u)}" style="${getProfileAvatarUrl(u) ? '' : 'display:none'}">
+              <span>${escapeHtml(u.nickname)} (${u.id})</span>
+              <button onclick="viewUserProfile('${u.id}')">${t('viewProfile')}</button>
+            </div>
+          `).join('') || (q ? t('userDoesNotExist') : '');
+        };
+      }
+    }
+
+    window.viewUserProfile = function(userId) {
+      const users = getUsers();
+      const user = users.find(u => u.id === userId);
+      if (!user) return;
+      const modal = document.createElement('div');
+      modal.className = 'overlay';
+      modal.innerHTML = `
+        <div class="modal" style="max-width:700px">
+          <span class="close-btn" id="closeProfile">[X]</span>
+          <div class="flex-row">
+            <img class="avatar-small" src="${getProfileAvatarUrl(user)}" style="${getProfileAvatarUrl(user) ? '' : 'display:none'}">
+            <strong>${escapeHtml(user.nickname)}</strong> (${user.id})
+          </div>
+          <p>${escapeHtml(user.description)}</p>
+          <p>${escapeHtml(user.note)}</p>
+          <p>${Date.now() - user.lastActive < 120000 ? t('online') : t('offline')} | ${t('timeSpent')}: ${Math.floor((user.timeSpent||0)/60)}m</p>
+          <p>${t('achievements')}: ${(user.achievements||[]).length}/2</p>
+          <p>${t('followers')}: ${(user.followers||[]).length} | ${t('following')}: ${(user.following||[]).length}</p>
+          <button id="followBtn">${user.followers.includes(currentUser.id) ? 'Unfollow' : t('follow')}</button>
+          <hr>
+          <h4>${t('chat')} ${escapeHtml(user.nickname)}</h4>
+          <div class="terminal-window" id="chatMessages" style="height:150px"></div>
+          <div class="flex-row">
+            <input id="chatInput" placeholder="${t('text')}..." style="flex:1">
+            <button id="sendChatBtn">${t('send')} 📤</button>
+          </div>
+          <button id="voiceRecordBtn">🎤 ${t('recordVoice')}</button>
+          <div id="typingIndicator"></div>
+          <button id="moreProfileBtn">${t('more')}...</button>
+          <div id="moreSection" hidden></div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      const chatId = [currentUser.id, user.id].sort().join('_');
+      const loadChat = () => {
+        const chats = getChats();
+        const msgs = chats[chatId] || [];
+        document.getElementById('chatMessages').innerHTML = msgs.map(m => {
+    const isMe = m.from === currentUser.id;
+    const align = isMe ? 'text-align:left' : 'text-align:right';
+    const sender = isMe ? 'You' : user.nickname;
+    let content;
+    if (m.type === 'voice') {
+        content = `🎤 Voice message [${t('listen')}] ${m.duration}s ${m.loop ? '🔁' : ''}`;
+    } else {
+        content = escapeHtml(m.content);
+    }
+    return `<div style="${align}; margin:4px 0;"><strong>${sender}:</strong> ${content}</div>`;
+}).join('\n');
+      };
+      loadChat();
+      document.getElementById('sendChatBtn').onclick = () => {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text) return;
+        const chats = getChats();
+        if (!chats[chatId]) chats[chatId] = [];
+        chats[chatId].push({ from: currentUser.id, to: user.id, type: 'text', content: text, timestamp: Date.now() });
+        saveChats(chats);
+        input.value = '';
+        loadChat();
+        addCDOE({ userId: currentUser.id, action: `sent message to ${user.id}` });
+      };
+      let mediaRecorder;
+      document.getElementById('voiceRecordBtn').onmousedown = () => {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+          mediaRecorder = new MediaRecorder(stream);
+          const chunks = [];
+          mediaRecorder.ondataavailable = e => chunks.push(e.data);
+          mediaRecorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'audio/webm' });
+            const duration = Math.floor((Date.now() - startTime) / 1000);
+            const chats = getChats();
+            if (!chats[chatId]) chats[chatId] = [];
+            chats[chatId].push({ from: currentUser.id, to: user.id, type: 'voice', content: URL.createObjectURL(blob), duration, loop: false, timestamp: Date.now() });
+            saveChats(chats);
+            loadChat();
+          };
+          mediaRecorder.start();
+          startTime = Date.now();
+        }).catch(() => {
+          // имитация
+          const duration = 2;
+          const chats = getChats();
+          if (!chats[chatId]) chats[chatId] = [];
+          chats[chatId].push({ from: currentUser.id, to: user.id, type: 'voice', content: '', duration, loop: false, timestamp: Date.now() });
+          saveChats(chats);
+          loadChat();
+        });
+      };
+      document.getElementById('voiceRecordBtn').onmouseup = () => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+      };
+      document.getElementById('moreProfileBtn').onclick = () => {
+        const sec = document.getElementById('moreSection');
+        sec.hidden = !sec.hidden;
+        if (!sec.hidden) {
+          sec.innerHTML = `
+            <div>RU: ${user.followers.includes(currentUser.id)?'⚡':''} ${/* здесь можно добавить индикаторы печати */''}</div>
+            <button id="otherBtn">${t('other')}</button>
+            <div id="otherSection" hidden></div>
+          `;
+          document.getElementById('otherBtn').onclick = () => {
+            const other = document.getElementById('otherSection');
+            other.hidden = !other.hidden;
+            if (!other.hidden) {
+              other.innerHTML = `
+                <input id="devPassword" type="password" placeholder="${t('passwordDev')}">
+                <div id="devError" class="red"></div>
+                <div id="devControls" hidden>
+                  <h4>${t('displayText')}</h4>
+                  <select id="textSize"><option>Small</option><option>Medium</option><option>Large</option></select>
+                  <select id="textColor"><option>White</option><option>Black</option><option>Red</option></select>
+                  <input id="displayTextInput" placeholder="${t('text')}">
+                  <button id="displayTextBtn">${t('display')}</button>
+                  <h4>${t('ban')}</h4>
+                  <input id="banTime" type="number" placeholder="${t('banTime')} (hours)">
+                  <input id="banReason" placeholder="${t('banReason')}">
+                  <input id="banComment" placeholder="${t('banComment')}">
+                  <button id="banBtn">${t('ban')}</button>
+                  <button id="viewCdoeBtn">${t('viewCdoe')}</button>
+                </div>
+              `;
+              let attempts = 0;
+              document.getElementById('devPassword').onkeyup = (e) => {
+                if (e.key === 'Enter') {
+                  const pass = document.getElementById('devPassword').value;
+                  if (pass === 'dev20hu_iLLegal_rOOt_permiSSions') {
+                    document.getElementById('devControls').hidden = false;
+                    document.getElementById('devError').textContent = '';
+                  } else {
+                    attempts++;
+                    document.getElementById('devError').textContent = t('invalidPass');
+                    if (attempts >= 3) {
+                      document.getElementById('devPassword').disabled = true;
+                      setTimeout(() => { document.getElementById('devPassword').disabled = false; attempts = 0; }, 3600000);
+                    }
+                  }
+                }
+              };
+              document.getElementById('displayTextBtn').onclick = () => {
+                const size = document.getElementById('textSize').value;
+                const color = document.getElementById('textColor').value;
+                const text = document.getElementById('displayTextInput').value;
+                localStorage.setItem(STORAGE_KEYS.screenText, JSON.stringify({ target: user.id, size, color, text }));
+              };
+              document.getElementById('banBtn').onclick = () => {
+                const hours = parseInt(document.getElementById('banTime').value) || 1;
+                const reason = document.getElementById('banReason').value;
+                const comment = document.getElementById('banComment').value;
+                let users = getUsers();
+                const u = users.find(x => x.id === user.id);
+                if (u) {
+                  u.ban = { until: Date.now() + hours*3600000, reason, comment };
+                  saveUsers(users);
+                  addCDOE({ userId: currentUser.id, action: `banned user ${user.id}` });
+                }
+              };
+              document.getElementById('viewCdoeBtn').onclick = () => {
+                const cdoe = getCDOE().filter(e => e.userId === user.id);
+                const modal2 = document.createElement('div');
+                modal2.className = 'overlay';
+                modal2.innerHTML = `<div class="modal"><span class="close-btn">[X]</span><h4>CDOE of ${user.id}</h4><div class="terminal-window">${cdoe.map(e=>`[${e.num}] ${new Date(e.date).toLocaleString()} ${e.action}`).join('\n')}</div></div>`;
+                document.body.appendChild(modal2);
+                modal2.querySelector('.close-btn').onclick = () => modal2.remove();
+              };
+            }
+          };
+        }
+      };
+      document.getElementById('closeProfile').onclick = () => modal.remove();
+      document.getElementById('followBtn').onclick = () => {
+        let users = getUsers();
+        const me = users.find(u => u.id === currentUser.id);
+        const target = users.find(u => u.id === user.id);
+        if (me && target) {
+          if (target.followers.includes(me.id)) {
+            target.followers = target.followers.filter(id => id !== me.id);
+            me.following = me.following.filter(id => id !== target.id);
+          } else {
+            target.followers.push(me.id);
+            me.following.push(target.id);
+          }
+          saveUsers(users);
+          modal.remove();
+          viewUserProfile(userId);
+        }
+      };
+    };
+
+    function openTerminal() {
+      const modal = document.createElement('div');
+      modal.className = 'overlay';
+      modal.innerHTML = `
+        <div class="modal" style="max-width:800px">
+          <span class="close-btn" id="closeTerminal">[X]</span>
+          <div class="terminal-window" id="terminalOutput" style="height:300px">tur@:~/#></div>
+          <input id="terminalInput" style="width:100%" placeholder="команда">
+        </div>
+      `;
+      document.body.appendChild(modal);
+      const output = document.getElementById('terminalOutput');
+      const input = document.getElementById('terminalInput');
+      let cwd = '/home/user';
+      const fs = getTerminalFS();
+      const commands = {
+        help: () => 'ls cd pwd echo cat mkdir touch rm rmdir date whoami clear uname',
+        ls: () => {
+          const dir = getDir(cwd);
+          return dir ? Object.keys(dir).join(' ') : 'нет доступа';
+        },
+        pwd: () => cwd,
+        cd: (args) => {
+          if (args[0] === '..') { cwd = cwd.substring(0, cwd.lastIndexOf('/')) || '/'; return ''; }
+          // упрощённо
+          return '';
+        },
+        echo: (args) => args.join(' '),
+        whoami: () => `user${currentUser.id}`,
+        date: () => new Date().toString(),
+        clear: () => { output.innerHTML = ''; return ''; }
+      };
+      function getDir(path) {
+        const parts = path.split('/').filter(Boolean);
+        let node = fs;
+        for (const p of parts) { if (!node[p]) return null; node = node[p]; }
+        return node;
+      }
+      input.onkeyup = (e) => {
+        if (e.key === 'Enter') {
+          const cmd = input.value.trim();
+          input.value = '';
+          output.innerHTML += `\ntur@:~/#> ${cmd}`;
+          const [c, ...args] = cmd.split(' ');
+          if (commands[c]) {
+            const result = commands[c](args);
+            if (result) output.innerHTML += `\n${result}`;
+          } else {
+            output.innerHTML += `\ncommand is not defined: '${cmd}': command is damaged or not exist.`;
+          }
+          output.scrollTop = output.scrollHeight;
+        }
+      };
+      document.getElementById('closeTerminal').onclick = () => modal.remove();
+    }
+
+    function renderBanScreen(user) {
+      app.innerHTML = `
+        <div class="overlay" style="position:static">
+          <div class="modal">
+            <h3 class="red">${t('bannedMessage')}, ${escapeHtml(user.nickname)}!</h3>
+            <p>${t('bannedMessage')} ID: ${user.id}</p>
+            <p>${t('banTime')}: ${new Date(user.ban.until).toLocaleString()}</p>
+            <p>${t('banReason')}: ${user.ban.reason}</p>
+            <p>${t('banComment')}: ${user.ban.comment}</p>
+            <button id="viewLogBtn">${t('viewLog')}</button>
+            <button id="moreBanBtn">${t('more')}</button>
+            <div id="banMore" hidden>
+              <button id="removeUserBtn">${t('removeUser')}</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('viewLogBtn').onclick = () => {
+        const logs = user.logs || [];
+        alert(logs.map(l => `${l.date} user "${user.id}" ${l.text}`).join('\n') || 'No logs');
+      };
+      document.getElementById('moreBanBtn').onclick = () => {
+        document.getElementById('banMore').hidden = false;
+        document.getElementById('removeUserBtn').onclick = () => {
+          if (confirm('Remove user permanently?')) {
+            let users = getUsers();
+            users = users.filter(u => u.id !== user.id);
+            saveUsers(users);
+            localStorage.removeItem(STORAGE_KEYS.currentUserId);
+            renderAlone();
+          }
+        };
+      };
+    }
+
+    function renderAlone() {
+      app.innerHTML = `
+        <div class="overlay" style="position:static">
+          <div class="modal">
+            <h3>Alone</h3>
+            <p>${t('aloneHelp')}</p>
+            <div class="terminal-window" id="aloneOutput">alone]</div>
+            <input id="aloneInput" style="width:100%">
+          </div>
+        </div>
+      `;
+      const output = document.getElementById('aloneOutput');
+      const input = document.getElementById('aloneInput');
+      input.onkeyup = (e) => {
+        if (e.key === 'Enter') {
+          const cmd = input.value.trim();
+          output.innerHTML += `\nalone] ${cmd}`;
+          if (cmd === 'help') output.innerHTML += `\nhelp - show this help\nabyss - abyss command`;
+          else if (cmd === 'abyss') output.innerHTML += `\n${t('abyssHint')}`;
+          else output.innerHTML += `\nAlone... Cannot unalone '${cmd}': You alone...`;
+          input.value = '';
+          output.scrollTop = output.scrollHeight;
+        }
+      };
+    }
+    
+    function getProfileAvatarUrl(targetUser) {
+    // Если смотрим свой профиль — показываем свой аватар всегда
+    if (targetUser.id === currentUser.id) {
+        return targetUser.avatar || '';
+    }
+    // Если чужой профиль и аватар приватный — показываем заглушку
+    if (targetUser.visibility === 'private') {
+        return PRIVATE_AVATAR_PLACEHOLDER;
+    }
+    // Если публичный — показываем как обычно
+    return targetUser.avatar || '';
+}
+    
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"]/g, function(m) {
+        return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m];
+      });
+    }
+
+    // Проверка screenText для текущего пользователя
+    setInterval(() => {
+      const item = localStorage.getItem(STORAGE_KEYS.screenText);
+      if (item) {
+        const data = JSON.parse(item);
+        if (data.target === currentUser.id) {
+          const overlay = document.createElement('div');
+          overlay.style.position = 'fixed';
+          overlay.style.top = 0; overlay.style.left = 0; overlay.style.width = '100%'; overlay.style.height = '100%';
+          overlay.style.display = 'flex'; overlay.style.alignItems = 'center'; overlay.style.justifyContent = 'center';
+          overlay.style.zIndex = 9999;
+          overlay.style.color = data.color === 'White' ? '#fff' : data.color === 'Red' ? '#f00' : '#000';
+          overlay.style.fontSize = data.size === 'Small' ? '20px' : data.size === 'Medium' ? '40px' : '60px';
+          overlay.style.background = 'rgba(0,0,0,0.8)';
+          overlay.textContent = data.text;
+          document.body.appendChild(overlay);
+          setTimeout(() => overlay.remove(), 5000);
+          localStorage.removeItem(STORAGE_KEYS.screenText);
+        }
+      }
+    }, 500);
+
+    // Старт
+    renderMain();
+    getSiteCreationTime();
+startNanosecondTimer();
+    
+    // Глобальные обработчики нажатия/отпускания для CDOE
+document.addEventListener('mousedown', () => {
+    addCDOE({ userId: currentUser.id, action: 'pressed in screen' });
+});
+document.addEventListener('mouseup', () => {
+    addCDOE({ userId: currentUser.id, action: 'released from screen' });
+});
+document.addEventListener('touchstart', () => {
+    addCDOE({ userId: currentUser.id, action: 'pressed in screen' });
+});
+document.addEventListener('touchend', () => {
+    addCDOE({ userId: currentUser.id, action: 'released from screen' });
+});
+  </script>
+</body>
+</html>
